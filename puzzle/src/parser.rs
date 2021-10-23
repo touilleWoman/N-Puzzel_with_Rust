@@ -2,24 +2,29 @@ use super::types::Matrix;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-pub fn parse() -> Matrix {
-    let filename = "../test1";
-    let file = File::open(filename).unwrap();
+pub fn parse(filepath: &'static str) -> Matrix {
+    let file = File::open(filepath).unwrap();
     let reader = BufReader::new(file);
     let mut row: i32 = 0;
     let mut data = Vec::new();
     for line in reader.lines() {
-        let line = line.unwrap();
-        if line.chars().next() == Some('#') || line.chars().next().is_none() {
+        let mut line = line.unwrap();
+
+        // delete comment after #
+        let sharp_offset = line.find('#').unwrap_or(line.len());
+        let line: String = line.drain(..sharp_offset).collect();
+
+        let line = line.trim();
+        if line.is_empty() {
             continue;
         } else if row == 0 {
             row = line.parse::<i32>().unwrap();
         } else {
-            data.push(line.parse::<i32>().unwrap())
+            let iter = line.split_ascii_whitespace();
+            for x in iter {
+                data.push(x.parse::<i32>().unwrap())
+            }
         }
     }
-    Matrix {
-        row: row,
-        data: data,
-    }
+    Matrix::new(row, data).unwrap()
 }

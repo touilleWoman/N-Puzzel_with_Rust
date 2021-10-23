@@ -2,11 +2,10 @@ mod parser;
 mod types;
 
 use parser::parse;
-// use types::Matrix;
+// use types::*;
 
 fn main() {
-    let m = parse();
+    let m = parse("../test2");
     println!("{}", m.row);
     println!("{:?}", m.data);
-    m.selfcheck();
 }

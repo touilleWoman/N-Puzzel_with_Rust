@@ -4,18 +4,20 @@ pub struct Matrix {
 }
 
 impl Matrix {
-    pub fn selfcheck(self) {
-        if self.row < 3 {
-            panic!("Puzzel size wrong")
+    pub fn new(row: i32, data: Vec<i32>) -> Result<Matrix, &'static str> {
+        if row < 3 {
+            return Err("Puzzel size wrong");
         }
-        if self.data.len() as i32 != self.row * self.row {
-            panic!("Puzzel content nb wrong");
+        if data.len() as i32 != row * row {
+            return Err("Puzzel content nb wrong");
         };
-        let ordered: Vec<i32> = (0..self.row * self.row).collect();
-        let mut sort_data = self.data.clone();
+        let ordered: Vec<i32> = (0..row * row).collect();
+        let mut sort_data = data.clone();
         sort_data.sort();
         if sort_data != ordered {
-            panic!("Puzzel content wrong");
+            return Err("Puzzel content wrong");
         }
+        let m = Self { row, data };
+        return Ok(m);
     }
 }
