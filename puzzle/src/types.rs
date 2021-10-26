@@ -1,8 +1,11 @@
+#[derive(PartialEq)]
 pub struct Matrix {
     pub row: i32,
     pub data: Vec<i32>,
     pub parent: Vec<i32>,
+    // pub parent: &Matrix,
     pub h_cost: i32,
+    pub g_cost: i32,
 }
 
 impl Matrix {
@@ -19,17 +22,15 @@ impl Matrix {
         if sort_data != ordered {
             return Err("Puzzel content wrong");
         }
-        let parent = vec![];
-        let h_cost = 0;
         let m = Self {
-            row,
-            data,
-            parent,
-            h_cost,
+            row: row,
+            data: data,
+            parent: vec![],
+            h_cost: 0,
+            g_cost: 0,
         };
         return Ok(m);
     }
-
     pub fn position(&self, value: i32) -> (i32, i32) {
         let p: i32 = self.data.iter().position(|&x| x == value).unwrap() as i32;
         // println!("position of value({}) =>{}", value, p);
@@ -70,7 +71,7 @@ impl Matrix {
             }
         }
     }
-    pub fn update_h_cost(&mut self, goal: Matrix) {
+    pub fn update_h_cost(&mut self, goal: &Matrix) {
         let mut total = 0;
         for value in self.data.iter() {
             if *value == 0 {
@@ -84,5 +85,8 @@ impl Matrix {
         }
         self.h_cost = total;
         println!("hcost:{}", self.h_cost);
+    }
+    pub fn update_g_cost(&mut self, g: i32) {
+        self.g_cost = g;
     }
 }
