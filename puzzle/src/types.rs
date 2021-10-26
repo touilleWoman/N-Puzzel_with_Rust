@@ -1,9 +1,11 @@
-#[derive(PartialEq)]
+use std::rc::Rc;
+
+#[derive(Clone, PartialEq)]
 pub struct Matrix {
     pub row: i32,
     pub data: Vec<i32>,
-    pub parent: Vec<i32>,
-    // pub parent: &Matrix,
+    // pub parent: Vec<i32>,
+    pub parent: Option<Rc<Matrix>>,
     pub h_cost: i32,
     pub g_cost: i32,
 }
@@ -25,7 +27,7 @@ impl Matrix {
         let m = Self {
             row: row,
             data: data,
-            parent: vec![],
+            parent: None,
             h_cost: 0,
             g_cost: 0,
         };
