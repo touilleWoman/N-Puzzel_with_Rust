@@ -1,10 +1,10 @@
+//! struct Matrix and methods
 use std::rc::Rc;
 
 #[derive(Clone, PartialEq)]
 pub struct Matrix {
     pub row: i32,
     pub data: Vec<i32>,
-    // pub parent: Vec<i32>,
     pub parent: Option<Rc<Matrix>>,
     pub h_cost: i32,
     pub g_cost: i32,
@@ -81,8 +81,6 @@ impl Matrix {
             }
             let po_goal = goal.position(*value);
             let po_current = self.position(*value);
-            // println!("po_goal{:?}", po_goal);
-            // println!("po_current{:?}", po_goal);
             total += (po_goal.0 - po_current.0).abs() + (po_goal.1 - po_current.1).abs();
         }
         self.h_cost = total;
