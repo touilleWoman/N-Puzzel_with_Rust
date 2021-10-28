@@ -86,7 +86,7 @@ impl Matrix {
             total += (po_goal.0 - po_current.0).abs() + (po_goal.1 - po_current.1).abs();
         }
         self.h_cost = total;
-        println!("hcost:{}", self.h_cost);
+        println!("hcost updated:{}", self.h_cost);
     }
     pub fn update_g_cost(&mut self, g: i32) {
         self.g_cost = g;

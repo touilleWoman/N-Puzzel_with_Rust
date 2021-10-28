@@ -55,7 +55,6 @@ def make_goal(s):
 		y += iy
 		if cur == s*s:
 			cur = 0
-	print(puzzle)
 	return puzzle
 
 if __name__ == "__main__":

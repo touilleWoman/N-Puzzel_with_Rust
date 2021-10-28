@@ -7,7 +7,7 @@ use parser::parse;
 // use types::*;
 
 fn main() {
-    let m = parse("../test1");
+    let m = parse("../test2");
     println!("{}", m.row);
     println!("{:?}", m.data);
     println!("value 0 is at :{:?}", m.position(0));
