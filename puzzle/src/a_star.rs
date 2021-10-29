@@ -21,8 +21,9 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
         .collect()
 }
 
+use super::Heuristic;
 
-pub fn a_star(mut origin: Matrix) {
+pub fn a_star(mut origin: Matrix, heu: Heuristic) {
     let goal: Matrix = Matrix::new(origin.row, origin.make_goal()).unwrap();
     let mut open: Vec<Rc<Matrix>> = Vec::new();
     let mut closed: Vec<Rc<Matrix>> = Vec::new();
@@ -30,11 +31,11 @@ pub fn a_star(mut origin: Matrix) {
     let success: bool = false;
     let mut max_nb: usize = 0;
 
-    origin.update_h_cost(&goal);
+    origin.update_h_cost(&goal, &heu);
     open.push(Rc::new(origin));
     let mut open_counter = 1;
     while !open.is_empty() && !success {
-        println!("loop start");
+        // println!("loop start");
 
         // current is the Matrix which has the lowest f value
         let current: Rc<Matrix> = open
@@ -46,7 +47,7 @@ pub fn a_star(mut origin: Matrix) {
         // remove current from open list, add it to closed list
         open.remove(open.iter().position(|r| *r == current).unwrap());
         closed.push(current.clone());
-        println!("current{:?}", current.data);
+        // println!("current{:?}", current.data);
 
         if current.data == goal.data {
             return solution_found(open_counter, g_cost, max_nb, current);
@@ -54,17 +55,17 @@ pub fn a_star(mut origin: Matrix) {
 
         g_cost += 1;
         for mut neighbour in neighbours(current.clone()) {
-            println!("neighbour{:?} ", neighbour.data);
+            // println!("neighbour{:?} ", neighbour.data);
 
             if closed.iter().find(|r| (***r).data == (*neighbour).data) != None {
                 // if neighbour in closed list, skip to next neighbour
-                println!("neighbour{:?} in closed", neighbour.data);
+                // println!("neighbour{:?} in closed", neighbour.data);
                 continue;
             }
             let in_open = open.iter().find(|r| **r == neighbour);
             let mut mut_nei = Rc::get_mut(&mut neighbour).unwrap();
 
-            mut_nei.update_h_cost(&goal);
+            mut_nei.update_h_cost(&goal, &heu);
             if mut_nei.h_cost + g_cost < current.h_cost + current.g_cost || in_open == None {
                 mut_nei.update_g_cost(g_cost);
                 mut_nei.parent = Some(current.clone());
@@ -100,10 +101,15 @@ fn solution_found(open_counter: i32, g_cost: i32, max_nb: usize, cur: Rc<Matrix>
 
 fn recursive_print_parent(cur: Rc<Matrix>) {
     match cur.parent.as_ref() {
-        None => return,
+        None => {},
         Some(next) => {
             recursive_print_parent((*next).clone());
-            println!("{:?}", next.data);
         }
     };
+    let mut v: Vec<i32> = cur.data.clone();
+
+    for _ in 0..cur.row {
+        println!("{:?}", v.drain(0..cur.row as usize).as_slice());
+    }
+    println!();
 }
