@@ -1,6 +1,7 @@
 mod a_star;
 mod parser;
 mod types;
+mod generator;
 
 extern crate getopts;
 use getopts::Options;
@@ -9,6 +10,7 @@ use std::env;
 use a_star::a_star;
 use parser::parse;
 use types::Heuristic;
+use crate::generator::generator;
 
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: ./{} [options]", program);
@@ -21,6 +23,12 @@ fn main() {
 
     let mut opts = Options::new();
     opts.optflag("h", "help", "print this help menu");
+    opts.optopt(
+        "g",
+        "generate",
+        "generate a starting board radomly with given size and iterations",
+        "Ex: 4",
+    );
     opts.optopt(
         "f",
         "file",
@@ -51,8 +59,18 @@ fn main() {
     let heuristic = Heuristic::from_str(heu.trim()).unwrap();
     println! {"Using heuristic {:?}", heuristic};
 
-    let inputfile = matches.opt_str("f").unwrap();
-    let m = parse(&inputfile);
+
+    let generate = matches.opt_str("g");
+    let inputfile = matches.opt_str("f");
+
+    let m = if generate.is_none() && inputfile.is_none() {
+        panic!("No input, need to get starting board with options --generate OR --file")
+    } else if generate.is_some() {
+        generator(generate.unwrap().parse::<i32>().unwrap(), 10)
+    } else {
+        parse(&(inputfile.unwrap()))
+    };
+
     println!("Puzzuel size: {}\n{:?}", m.row, m.data);
     a_star(m, heuristic);
 }

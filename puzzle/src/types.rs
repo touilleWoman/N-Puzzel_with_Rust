@@ -39,40 +39,7 @@ impl Matrix {
         (p % self.row, p / self.row)
     }
 
-    pub fn make_goal(&self) -> Vec<i32> {
-        let mut g = vec![-1; (self.row * self.row) as usize];
-        let mut cur: i32 = 1;
-        let mut x: i32 = 0;
-        let mut ix: i32 = 1;
-        let mut y: i32 = 0;
-        let mut iy: i32 = 0;
-        loop {
-            g[(x + y * self.row) as usize] = cur;
-            if cur == 0 {
-                println!("goal:{:?}", g);
-                break g;
-            }
-            cur += 1;
-            if x + ix == self.row
-                || x + ix < 0
-                || (ix != 0 && g[(x + ix + y * self.row) as usize] != -1)
-            {
-                iy = ix;
-                ix = 0;
-            } else if y + iy == self.row
-                || y + iy < 0
-                || (iy != 0 && g[(x + (y + iy) * self.row) as usize] != -1)
-            {
-                ix = -iy;
-                iy = 0;
-            }
-            x += ix;
-            y += iy;
-            if cur == self.row * self.row {
-                cur = 0
-            }
-        }
-    }
+
     pub fn update_h_cost(&mut self, goal: &Matrix, heu: &Heuristic) {
         let mut total = 0;
         for value in self.data.iter() {
