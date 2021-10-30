@@ -83,11 +83,10 @@ impl Matrix {
             let po_current = self.position(*value);
             // total += (po_goal.0 - po_current.0).abs() + (po_goal.1 - po_current.1).abs();
             total += match heu {
-                Heuristic::Manhattan =>manhattan(po_current, po_goal),
-                Heuristic::TilesOut =>tiles_out_of_place(po_current, po_goal),
+                Heuristic::Manhattan => manhattan(po_current, po_goal),
+                Heuristic::TilesOut => tiles_out_of_place(po_current, po_goal),
                 Heuristic::Euclidean => euclidean(po_current, po_goal),
             }
-             
         }
         self.h_cost = total;
         // println!("hcost updated:{}", self.h_cost);
@@ -97,19 +96,19 @@ impl Matrix {
     }
 }
 
-fn tiles_out_of_place(p:(i32, i32), goal:(i32, i32)) -> i32 {
+fn tiles_out_of_place(p: (i32, i32), goal: (i32, i32)) -> i32 {
     match p == goal {
         true => 0,
-        false => 1
+        false => 1,
     }
 }
 
-fn euclidean(p:(i32, i32), goal:(i32, i32)) -> i32 {
+fn euclidean(p: (i32, i32), goal: (i32, i32)) -> i32 {
     let x = ((goal.0 - p.0).pow(2) + (goal.1 - p.1).pow(2)) as f64;
     x.sqrt() as i32
 }
 
-fn manhattan(p:(i32, i32), goal:(i32, i32)) -> i32 {
+fn manhattan(p: (i32, i32), goal: (i32, i32)) -> i32 {
     (goal.0 - p.0).abs() + (goal.1 - p.1).abs()
 }
 
@@ -126,7 +125,7 @@ impl Heuristic {
             "Manhattan" | "manhattan" | "man" => Ok(Heuristic::Manhattan),
             "Euclidean" | "euclidean" | "euc" => Ok(Heuristic::Euclidean),
             "TilesOut" | "tiles out" | "til" => Ok(Heuristic::TilesOut),
-            _ => Err("Wrong heuristic input, choose from Manhattan, Euclidean or TileOut")
+            _ => Err("Wrong heuristic input, choose from Manhattan, Euclidean or TileOut"),
         }
     }
 }

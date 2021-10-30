@@ -2,8 +2,10 @@ use super::types::Matrix;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-pub fn parse(filepath: &'static str) -> Matrix {
-    let file = File::open(filepath).unwrap();
+pub fn parse(filepath: &str) -> Matrix {
+    let mut err_msg = String::from("Wrong file path => ");
+    err_msg.push_str(filepath);
+    let file = File::open(filepath).expect(&err_msg);
     let reader = BufReader::new(file);
     let mut row: i32 = 0;
     let mut data = Vec::new();

@@ -1,5 +1,6 @@
-//! A* algo for searching solution of puzzel
+//! A* algo for searching solution of N-puzzel
 use super::types::Matrix;
+use super::Heuristic;
 use std::rc::Rc;
 
 ///return next possible steps of a given puzzel
@@ -21,23 +22,24 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
         .collect()
 }
 
-use super::Heuristic;
-
+/// A* algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
 pub fn a_star(mut origin: Matrix, heu: Heuristic) {
     let goal: Matrix = Matrix::new(origin.row, origin.make_goal()).unwrap();
     let mut open: Vec<Rc<Matrix>> = Vec::new();
     let mut closed: Vec<Rc<Matrix>> = Vec::new();
     let mut g_cost = 0;
     let success: bool = false;
-    let mut max_nb: usize = 0;
+    let mut max_nb: usize = 0; // in open list or open+ closed ?????
 
+    // add origin matrix in open
     origin.update_h_cost(&goal, &heu);
     open.push(Rc::new(origin));
     let mut open_counter = 1;
+
     while !open.is_empty() && !success {
         // println!("loop start");
 
-        // current is the Matrix which has the lowest f value
+        // select the Matrix with the lowest f_cost in open list
         let current: Rc<Matrix> = open
             .iter()
             .min_by_key(|x| x.h_cost + x.g_cost)
@@ -58,19 +60,22 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) {
             // println!("neighbour{:?} ", neighbour.data);
 
             if closed.iter().find(|r| (***r).data == (*neighbour).data) != None {
-                // if neighbour in closed list, skip to next neighbour
-                // println!("neighbour{:?} in closed", neighbour.data);
+                // if neighbour matrix is in closed list, skip to next
                 continue;
             }
-            let in_open = open.iter().find(|r| **r == neighbour);
-            let mut mut_nei = Rc::get_mut(&mut neighbour).unwrap();
 
-            mut_nei.update_h_cost(&goal, &heu);
-            if mut_nei.h_cost + g_cost < current.h_cost + current.g_cost || in_open == None {
-                mut_nei.update_g_cost(g_cost);
-                mut_nei.parent = Some(current.clone());
+            let in_open = open.iter().find(|r| **r == neighbour);
+
+            let mut neighbour = Rc::get_mut(&mut neighbour).unwrap();
+            neighbour.update_h_cost(&goal, &heu);
+
+            // if neighbour matrix has lower f_cost(f = h + g) OR neighbour in open list
+            if neighbour.h_cost + g_cost < current.h_cost + current.g_cost || in_open == None {
+                neighbour.update_g_cost(g_cost);
+                neighbour.parent = Some(current.clone()); // set parent of neighbour is current
                 if in_open == None {
-                    let nei = mut_nei.clone();
+                    //if neighbour not in open, then add to open list
+                    let nei = neighbour.clone();
                     open.push(Rc::new(nei));
                     open_counter += 1;
                 }
@@ -101,7 +106,7 @@ fn solution_found(open_counter: i32, g_cost: i32, max_nb: usize, cur: Rc<Matrix>
 
 fn recursive_print_parent(cur: Rc<Matrix>) {
     match cur.parent.as_ref() {
-        None => {},
+        None => {}
         Some(next) => {
             recursive_print_parent((*next).clone());
         }
