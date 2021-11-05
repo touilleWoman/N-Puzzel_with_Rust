@@ -25,7 +25,6 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
 
 /// A* algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
 pub fn a_star(mut origin: Matrix, heu: Heuristic) {
-    // let goal: Matrix = Matrix::new(origin.row, origin.make_goal()).unwrap();
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
     let mut open: Vec<Rc<Matrix>> = Vec::new();
     let mut closed: Vec<Rc<Matrix>> = Vec::new();

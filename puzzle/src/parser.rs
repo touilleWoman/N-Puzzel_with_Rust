@@ -1,7 +1,6 @@
 use super::types::Matrix;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use super::generator::generator;
 
 pub fn make_goal(row: i32) -> Vec<i32> {
     let mut g = vec![-1; (row * row) as usize];
@@ -39,7 +38,6 @@ pub fn make_goal(row: i32) -> Vec<i32> {
 }
 
 pub fn parse(filepath: &str) -> Matrix {
-    generator(3, 100);
     let mut err_msg = String::from("Wrong file path => ");
     err_msg.push_str(filepath);
     let file = File::open(filepath).expect(&err_msg);

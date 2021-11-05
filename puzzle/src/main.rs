@@ -23,11 +23,18 @@ fn main() {
 
     let mut opts = Options::new();
     opts.optflag("h", "help", "print this help menu");
+    opts.optflag("u", "unsolvable", "generate an unsolvable starting board");
     opts.optopt(
         "g",
         "generate",
-        "generate a starting board radomly with given size and iterations",
+        "generate a starting board radomly with given size",
         "Ex: 4",
+    );
+    opts.optopt(
+        "i",
+        "iteration",
+        "define nb of iterations when generating the starting board, default is 1000",
+        "Ex: 500",
     );
     opts.optopt(
         "f",
@@ -52,6 +59,7 @@ fn main() {
         print_usage(&program, opts);
         return;
     }
+    let unsolvable = matches.opt_present("u");
     let heu = match matches.opt_str("h") {
         None => "Manhattan".to_string(), // Manhattan is default heuristic
         Some(x) => x,
@@ -62,11 +70,16 @@ fn main() {
 
     let generate = matches.opt_str("g");
     let inputfile = matches.opt_str("f");
+    let iteration = matches.opt_str("i");
 
     let m = if generate.is_none() && inputfile.is_none() {
         panic!("No input, need to get starting board with options --generate OR --file")
     } else if generate.is_some() {
-        generator(generate.unwrap().parse::<i32>().unwrap(), 10)
+        let iter : i32 = match iteration {
+            Some(x) => x.parse::<i32>().unwrap(),
+            None => 1000,
+        };
+        generator(generate.unwrap().parse::<i32>().unwrap(), iter, unsolvable)
     } else {
         parse(&(inputfile.unwrap()))
     };
