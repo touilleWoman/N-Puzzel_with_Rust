@@ -40,7 +40,7 @@ fn main() {
         "f",
         "file",
         "get starting board from a filepath",
-        "Ex: ../tests/test3-1",
+        "Ex: testfiless/test3-1",
     );
     opts.optopt(
         "h",
@@ -73,7 +73,8 @@ fn main() {
     let iteration = matches.opt_str("i");
 
     let m = if generate.is_none() && inputfile.is_none() {
-        panic!("No input, need to get starting board with options --generate OR --file")
+        println!("No starting board infos, generate default : puzzule with size 3");
+        generator(3, 50, false)
     } else if generate.is_some() {
         let iter : i32 = match iteration {
             Some(x) => x.parse::<i32>().unwrap(),
