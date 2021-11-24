@@ -47,7 +47,6 @@ impl Matrix {
             }
             let po_goal = goal.position(*value);
             let po_current = self.position(*value);
-            // total += (po_goal.0 - po_current.0).abs() + (po_goal.1 - po_current.1).abs();
             total += match heu {
                 Heuristic::Manhattan => manhattan(po_current, po_goal),
                 Heuristic::TilesOut => tiles_out_of_place(po_current, po_goal),
@@ -55,10 +54,6 @@ impl Matrix {
             }
         }
         self.h_cost = total;
-        // println!("hcost updated:{}", self.h_cost);
-    }
-    pub fn update_g_cost(&mut self, g: i32) {
-        self.g_cost = g;
     }
 }
 

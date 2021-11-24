@@ -28,7 +28,6 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
     let mut open: Vec<Rc<Matrix>> = Vec::new();
     let mut closed: Vec<Rc<Matrix>> = Vec::new();
-    let mut g_cost = 0;
     let success: bool = false;
     let mut max_nb: usize = 0; // in open list or open+ closed ?????
 
@@ -38,8 +37,6 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let mut open_counter = 1;
 
     while !open.is_empty() && !success {
-        // println!("loop start");
-
         // select the Matrix with the lowest f_cost in open list
         let current: Rc<Matrix> = open
             .iter()
@@ -50,15 +47,12 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
         // remove current from open list, add it to closed list
         open.remove(open.iter().position(|r| *r == current).unwrap());
         closed.push(current.clone());
-        // println!("current{:?}", current.data);
 
         if current.data == goal.data {
-            return Some(solution_found(open_counter, g_cost, max_nb, current));
+            return Some(solution_found(open_counter, max_nb, current));
         }
 
-        g_cost += 1;
         for mut neighbour in neighbours(current.clone()) {
-            // println!("neighbour{:?} ", neighbour.data);
 
             if closed.iter().find(|r| (***r).data == (*neighbour).data) != None {
                 // if neighbour matrix is in closed list, skip to next
@@ -71,8 +65,8 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
             neighbour.update_h_cost(&goal, &heu);
 
             // if neighbour matrix has lower f_cost(f = h + g) OR neighbour in open list
-            if neighbour.h_cost + g_cost < current.h_cost + current.g_cost || in_open == None {
-                neighbour.update_g_cost(g_cost);
+            if neighbour.h_cost + neighbour.g_cost < current.h_cost + current.g_cost || in_open == None {
+                neighbour.g_cost += 1;
                 neighbour.parent = Some(current.clone()); // set parent of neighbour is current
                 if in_open == None {
                     //if neighbour not in open, then add to open list
@@ -97,11 +91,11 @@ complexity in size =>   Maximum number of states ever represented in memory at t
 Nb of moves =>          Number of moves required to transition from the initial state to the final state, according to the search
 
 */
-fn solution_found(open_counter: i32, g_cost: i32, max_nb: usize, cur: Rc<Matrix>) -> Vec<i32> {
+fn solution_found(open_counter: i32, max_nb: usize, cur: Rc<Matrix>) -> Vec<i32> {
     println!("Solution found !");
     println!("complexity in time: {}", open_counter);
     println!("complexity in size: {}", max_nb);
-    println!("Nb of moves: {}", g_cost);
+    println!("Nb of moves: {}", cur.g_cost);
     println!("\nOrdered sequence of states =>");
     recursive_print_parent(&cur);
     return cur.data.clone();
