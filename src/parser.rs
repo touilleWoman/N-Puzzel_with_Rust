@@ -16,15 +16,10 @@ pub fn make_goal(row: i32) -> Vec<i32> {
             break g;
         }
         cur += 1;
-        if x + ix == row
-            || x + ix < 0
-            || (ix != 0 && g[(x + ix + y * row) as usize] != -1)
-        {
+        if x + ix == row || x + ix < 0 || (ix != 0 && g[(x + ix + y * row) as usize] != -1) {
             iy = ix;
             ix = 0;
-        } else if y + iy == row
-            || y + iy < 0
-            || (iy != 0 && g[(x + (y + iy) * row) as usize] != -1)
+        } else if y + iy == row || y + iy < 0 || (iy != 0 && g[(x + (y + iy) * row) as usize] != -1)
         {
             ix = -iy;
             iy = 0;

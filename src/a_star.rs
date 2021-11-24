@@ -1,8 +1,8 @@
 //! A* algo for searching solution of N-puzzel
+use super::parser::make_goal;
 use super::types::Matrix;
 use super::Heuristic;
 use std::rc::Rc;
-use super::parser::make_goal;
 
 ///return next possible steps of a given puzzel
 fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
@@ -24,7 +24,7 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
 }
 
 /// A* algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
-pub fn a_star(mut origin: Matrix, heu: Heuristic) {
+pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
     let mut open: Vec<Rc<Matrix>> = Vec::new();
     let mut closed: Vec<Rc<Matrix>> = Vec::new();
@@ -53,7 +53,7 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) {
         // println!("current{:?}", current.data);
 
         if current.data == goal.data {
-            return solution_found(open_counter, g_cost, max_nb, current);
+            return Some(solution_found(open_counter, g_cost, max_nb, current));
         }
 
         g_cost += 1;
@@ -88,6 +88,7 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) {
             false => max_nb,
         }
     }
+    return None;
 }
 
 /** Puzzle resolved, print infomation:\n
@@ -96,20 +97,21 @@ complexity in size =>   Maximum number of states ever represented in memory at t
 Nb of moves =>          Number of moves required to transition from the initial state to the final state, according to the search
 
 */
-fn solution_found(open_counter: i32, g_cost: i32, max_nb: usize, cur: Rc<Matrix>) {
+fn solution_found(open_counter: i32, g_cost: i32, max_nb: usize, cur: Rc<Matrix>) -> Vec<i32> {
     println!("Solution found !");
     println!("complexity in time: {}", open_counter);
     println!("complexity in size: {}", max_nb);
     println!("Nb of moves: {}", g_cost);
     println!("\nOrdered sequence of states =>");
-    recursive_print_parent(cur);
+    recursive_print_parent(&cur);
+    return cur.data.clone();
 }
 
-fn recursive_print_parent(cur: Rc<Matrix>) {
+fn recursive_print_parent(cur: &Rc<Matrix>) {
     match cur.parent.as_ref() {
         None => {}
         Some(next) => {
-            recursive_print_parent((*next).clone());
+            recursive_print_parent((&next).clone());
         }
     };
     let mut v: Vec<i32> = cur.data.clone();

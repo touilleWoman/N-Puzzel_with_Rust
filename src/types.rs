@@ -39,7 +39,6 @@ impl Matrix {
         (p % self.row, p / self.row)
     }
 
-
     pub fn update_h_cost(&mut self, goal: &Matrix, heu: &Heuristic) {
         let mut total = 0;
         for value in self.data.iter() {

@@ -1,20 +1,11 @@
-mod a_star;
-mod parser;
-mod types;
-mod generator;
-
-extern crate getopts;
 use getopts::Options;
 use std::env;
 
-use a_star::a_star;
-use parser::parse;
-use types::Heuristic;
-use crate::generator::generator;
+use puzzle::*;
 
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: ./{} [options]", program);
-    print!{"{}", opts.usage(&brief)};
+    print! {"{}", opts.usage(&brief)};
 }
 
 fn main() {
@@ -52,7 +43,7 @@ fn main() {
     let matches = match opts.parse(&args[1..]) {
         Ok(x) => x,
         Err(f) => {
-            panic!("{}", f.to_string())
+            panic!("{}", f.to_string());
         }
     };
     if matches.opt_present("h") {
@@ -67,24 +58,23 @@ fn main() {
     let heuristic = Heuristic::from_str(heu.trim()).unwrap();
     println! {"Using heuristic {:?}", heuristic};
 
-
-    let generate = matches.opt_str("g");
-    let inputfile = matches.opt_str("f");
+    let opt_gen = matches.opt_str("g");
+    let opt_file = matches.opt_str("f");
     let iteration = matches.opt_str("i");
 
-    let m = if generate.is_none() && inputfile.is_none() {
+    let m = if opt_gen.is_none() && opt_file.is_none() {
         println!("No starting board infos, generate default : puzzule with size 3");
-        generator(3, 50, false)
-    } else if generate.is_some() {
-        let iter : i32 = match iteration {
+        generator::generator(3, 50, false)
+    } else if opt_gen.is_some() {
+        let iter: i32 = match iteration {
             Some(x) => x.parse::<i32>().unwrap(),
             None => 1000,
         };
-        generator(generate.unwrap().parse::<i32>().unwrap(), iter, unsolvable)
+        generator::generator(opt_gen.unwrap().parse::<i32>().unwrap(), iter, unsolvable)
     } else {
-        parse(&(inputfile.unwrap()))
+        parser::parse(&(opt_file.unwrap()))
     };
 
     println!("Puzzuel size: {}\n{:?}", m.row, m.data);
-    a_star(m, heuristic);
+    a_star::a_star(m, heuristic);
 }
