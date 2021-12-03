@@ -29,7 +29,7 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let mut open: Vec<Rc<Matrix>> = Vec::new();
     let mut closed: Vec<Rc<Matrix>> = Vec::new();
     let success: bool = false;
-    let mut max_nb: usize = 0; // in open list or open+ closed ?????
+    let mut max_nb: usize = 0; // Maximum number of states ever represented in memory
 
     // add origin matrix in open
     origin.update_h_cost(&goal, &heu);
@@ -53,7 +53,6 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
         }
 
         for mut neighbour in neighbours(current.clone()) {
-
             if closed.iter().find(|r| (***r).data == (*neighbour).data) != None {
                 // if neighbour matrix is in closed list, skip to next
                 continue;
@@ -65,7 +64,9 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
             neighbour.update_h_cost(&goal, &heu);
 
             // if neighbour matrix has lower f_cost(f = h + g) OR neighbour in open list
-            if neighbour.h_cost + neighbour.g_cost < current.h_cost + current.g_cost || in_open == None {
+            if neighbour.h_cost + neighbour.g_cost < current.h_cost + current.g_cost
+                || in_open == None
+            {
                 neighbour.g_cost += 1;
                 neighbour.parent = Some(current.clone()); // set parent of neighbour is current
                 if in_open == None {

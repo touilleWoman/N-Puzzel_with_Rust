@@ -12,7 +12,7 @@ pub fn make_goal(row: i32) -> Vec<i32> {
     loop {
         g[(x + y * row) as usize] = cur;
         if cur == 0 {
-            println!("goal=>{:?}", g);
+            // println!("goal=>{:?}", g);
             break g;
         }
         cur += 1;

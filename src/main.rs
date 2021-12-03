@@ -1,6 +1,6 @@
 use getopts::Options;
-use std::env;
 use puzzle::*;
+use std::env;
 
 fn print_usage(program: &str, opts: Options) {
     let brief = format!("Usage: ./{} [options]", program);
@@ -62,7 +62,7 @@ fn main() {
     let iteration = matches.opt_str("i");
 
     let m = if opt_gen.is_none() && opt_file.is_none() {
-        println!("No starting board infos, generate default : puzzule with size 3");
+        println!("No starting board infos, generate default => puzzle of size 3");
         generator::generator(3, 50, unsolvable)
     } else if opt_gen.is_some() {
         let iter: i32 = match iteration {
@@ -73,8 +73,7 @@ fn main() {
     } else {
         parser::parse(&(opt_file.unwrap()))
     };
-
-    println!("Puzzle size: {}\n{:?}", m.row, m.data);
+    // println!("Puzzle size: {}\n{:?}", m.row, m.data);
     if unsolvable_check::unsolvable_check(&m) {
         println!("This puzzle is unsolvable => \n{:?}", m.data);
         return;
