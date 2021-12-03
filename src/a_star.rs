@@ -4,6 +4,7 @@ use super::types::Matrix;
 use super::Heuristic;
 use std::rc::Rc;
 use std::collections::HashSet;
+use std::collections::BTreeMap;
 
 ///return next possible steps of a given puzzel
 fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
@@ -27,26 +28,22 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
 /// A* algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
 pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
-    let mut open: Vec<Rc<Matrix>> = Vec::new();
+    let mut open: BTreeMap<i32, Rc<Matrix>> = BTreeMap::new();           
     let mut closed: HashSet<Vec<i32>> = HashSet::new();
     let success: bool = false;
     let mut max_nb: usize = 0; // Maximum number of states ever represented in memory
 
     // add origin matrix in open
     origin.update_h_cost(&goal, &heu);
-    open.push(Rc::new(origin));
+    open.insert(origin.h_cost + origin.g_cost, Rc::new(origin));
     let mut open_counter = 1;
 
     while !open.is_empty() && !success {
+        
         // select the Matrix with the lowest f_cost in open list
-        let current: Rc<Matrix> = open
-            .iter()
-            .min_by_key(|x| x.h_cost + x.g_cost)
-            .unwrap()
-            .to_owned();
-
-        // remove current from open list, add it to closed list
-        open.remove(open.iter().position(|r| *r == current).unwrap());
+        // Since BtreeMap is ordered according to key value, min is the first item
+        let min_fcost: i32 = *(open.keys().next().unwrap());
+        let current = open.remove(&min_fcost).unwrap();
         closed.insert(current.data.clone());
 
         if current.data == goal.data {
@@ -58,7 +55,7 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
                 continue;
             }
 
-            let in_open = open.iter().find(|r| **r == neighbour);
+            let in_open = open.iter().find(|(_key, value)| **value == neighbour);
 
             let mut neighbour = Rc::get_mut(&mut neighbour).unwrap();
             neighbour.update_h_cost(&goal, &heu);
@@ -72,7 +69,8 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
                 if in_open == None {
                     //if neighbour not in open, then add to open list
                     let nei = neighbour.clone();
-                    open.push(Rc::new(nei));
+                    // open.push(Rc::new(nei));
+                    open.insert(neighbour.h_cost + neighbour.g_cost, Rc::new(nei));
                     open_counter += 1;
                 }
             }
