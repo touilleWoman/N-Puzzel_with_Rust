@@ -50,12 +50,6 @@ fn main() {
         return;
     }
     let unsolvable = matches.opt_present("u");
-    let heu = match matches.opt_str("h") {
-        None => "Manhattan".to_string(), // Manhattan is default heuristic
-        Some(x) => x,
-    };
-    let heuristic = Heuristic::from_str(heu.trim()).unwrap();
-    println! {"Using heuristic {:?}", heuristic};
 
     let opt_gen = matches.opt_str("g");
     let opt_file = matches.opt_str("f");
@@ -78,5 +72,12 @@ fn main() {
         println!("This puzzle is unsolvable => \n{:?}", m.data);
         return;
     }
+
+    let heu = match matches.opt_str("h") {
+        None => "Manhattan".to_string(), // Manhattan is default heuristic
+        Some(x) => x,
+    };
+    let heuristic = Heuristic::from_str(heu.trim()).unwrap();
+    println! {"Using heuristic {:?}", heuristic};
     a_star::a_star(m, heuristic);
 }

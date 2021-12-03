@@ -1,0 +1,10 @@
+# This puzzle is solvable
+# complexity in time: 62554
+# complexity in size: 35984
+# Nb of moves: 36
+5
+ 1  2  3  4 19
+16  0 18  5 21
+15  8  7  6 20
+14 17 24 22  9
+13 23 12 11 10
