@@ -3,6 +3,7 @@ use super::parser::make_goal;
 use super::types::Matrix;
 use super::Heuristic;
 use std::rc::Rc;
+use std::collections::HashSet;
 
 ///return next possible steps of a given puzzel
 fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
@@ -27,7 +28,7 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
 pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
     let mut open: Vec<Rc<Matrix>> = Vec::new();
-    let mut closed: Vec<Rc<Matrix>> = Vec::new();
+    let mut closed: HashSet<Vec<i32>> = HashSet::new();
     let success: bool = false;
     let mut max_nb: usize = 0; // Maximum number of states ever represented in memory
 
@@ -46,15 +47,14 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
 
         // remove current from open list, add it to closed list
         open.remove(open.iter().position(|r| *r == current).unwrap());
-        closed.push(current.clone());
+        closed.insert(current.data.clone());
 
         if current.data == goal.data {
             return Some(solution_found(open_counter, max_nb, current));
         }
 
         for mut neighbour in neighbours(current.clone()) {
-            if closed.iter().find(|r| (***r).data == (*neighbour).data) != None {
-                // if neighbour matrix is in closed list, skip to next
+            if closed.contains(&(*neighbour).data) {
                 continue;
             }
 
