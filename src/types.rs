@@ -1,14 +1,24 @@
 //! struct Matrix and methods
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub struct Matrix {
     pub row: i32,
     pub data: Vec<i32>,
-    pub parent: Option<Rc<Matrix>>,
+    pub parent: Option<Weak<Matrix>>,
     pub h_cost: i32,
     pub g_cost: i32,
 }
+
+// impl PartialEq for Matrix {
+//     fn eq(&self, other: &Self) -> bool {
+//         self.row == other.row &&
+//         self.data == other.data &&
+//         self.h_cost == other.h_cost &&
+//         self.g_cost == other.g_cost
+
+//     }
+// }
 
 impl Matrix {
     pub fn new(row: i32, data: Vec<i32>) -> Result<Matrix, &'static str> {

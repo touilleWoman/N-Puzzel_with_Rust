@@ -5,9 +5,10 @@ use super::Heuristic;
 use std::rc::Rc;
 use std::collections::HashSet;
 use std::collections::BTreeMap;
+use std::rc::Weak;
 
 ///return next possible steps of a given puzzel
-fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
+fn neighbours(current: Rc<Matrix>) -> Vec<Matrix> {
     let p = current.position(0);
 
     static NEIGHBOUR: [(i32, i32); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
@@ -20,7 +21,7 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
             let val: i32 = c.data[(b * c.row + a) as usize];
             c.data[(p.1 * c.row + p.0) as usize] = val;
             c.data[(b * c.row + a) as usize] = 0;
-            Rc::new(c)
+            c
         })
         .collect()
 }
@@ -28,14 +29,18 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Rc<Matrix>> {
 /// A* algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
 pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
-    let mut open: BTreeMap<i32, Rc<Matrix>> = BTreeMap::new();           
+    let mut open: BTreeMap<i32, Rc<Matrix>> = BTreeMap::new();
     let mut closed: HashSet<Vec<i32>> = HashSet::new();
+    let mut matrices: Vec<Rc<Matrix>> = Vec::new();
     let success: bool = false;
     let mut max_nb: usize = 0; // Maximum number of states ever represented in memory
 
     // add origin matrix in open
     origin.update_h_cost(&goal, &heu);
-    open.insert(origin.h_cost + origin.g_cost, Rc::new(origin));
+    let key = origin.h_cost + origin.g_cost;
+    let rc = Rc::new(origin);
+    open.insert(key, rc.clone());
+    matrices.push(rc);
     let mut open_counter = 1;
 
     while !open.is_empty() && !success {
@@ -47,30 +52,31 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
         closed.insert(current.data.clone());
 
         if current.data == goal.data {
-            return Some(solution_found(open_counter, max_nb, current));
+            return Some(solution_found(open_counter, max_nb, current.as_ref()));
         }
 
         for mut neighbour in neighbours(current.clone()) {
-            if closed.contains(&(*neighbour).data) {
+            if closed.contains(&neighbour.data) {
                 continue;
             }
 
-            let in_open = open.iter().find(|(_key, value)| **value == neighbour);
+            let in_open = open.iter().find(|(_key, value)| *value.as_ref().data == neighbour.data);
 
-            let mut neighbour = Rc::get_mut(&mut neighbour).unwrap();
             neighbour.update_h_cost(&goal, &heu);
 
             // if neighbour matrix has lower f_cost(f = h + g) OR neighbour in open list
             if neighbour.h_cost + neighbour.g_cost < current.h_cost + current.g_cost
-                || in_open == None
+                || in_open.is_none()
             {
                 neighbour.g_cost += 1;
-                neighbour.parent = Some(current.clone()); // set parent of neighbour is current
-                if in_open == None {
+                neighbour.parent = Some(Rc::downgrade(&current)); // set parent of neighbour is current
+                if in_open.is_none() {
                     //if neighbour not in open, then add to open list
-                    let nei = neighbour.clone();
                     // open.push(Rc::new(nei));
-                    open.insert(neighbour.h_cost + neighbour.g_cost, Rc::new(nei));
+                    let key = neighbour.h_cost + neighbour.g_cost;
+                    let rc = Rc::new(neighbour);
+                    open.insert(key, rc.clone());
+                    matrices.push(rc);
                     open_counter += 1;
                 }
             }
@@ -90,21 +96,21 @@ complexity in size =>   Maximum number of states ever represented in memory at t
 Nb of moves =>          Number of moves required to transition from the initial state to the final state, according to the search
 
 */
-fn solution_found(open_counter: i32, max_nb: usize, cur: Rc<Matrix>) -> Vec<i32> {
+fn solution_found(open_counter: i32, max_nb: usize, cur: &Matrix) -> Vec<i32> {
     println!("Solution found !");
     println!("complexity in time: {}", open_counter);
     println!("complexity in size: {}", max_nb);
     println!("Nb of moves: {}", cur.g_cost);
     println!("\nOrdered sequence of states =>");
-    recursive_print_parent(&cur);
+    recursive_print_parent(cur);
     return cur.data.clone();
 }
 
-fn recursive_print_parent(cur: &Rc<Matrix>) {
+fn recursive_print_parent(cur: &Matrix) {
     match cur.parent.as_ref() {
         None => {}
         Some(next) => {
-            recursive_print_parent((&next).clone());
+            recursive_print_parent(&next.upgrade().unwrap());
         }
     };
     let mut v: Vec<i32> = cur.data.clone();
