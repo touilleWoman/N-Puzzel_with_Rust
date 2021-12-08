@@ -1,6 +1,6 @@
 //! struct Matrix and methods
 use std::collections::BTreeMap;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 use std::vec;
 
@@ -14,19 +14,19 @@ pub struct Matrix {
 }
 
 pub struct Open {
-    pub hashset: HashSet<Vec<i32>>,
+    pub hashmap: HashMap<Vec<i32>, i32>,
     pub btree: BTreeMap<i32, Vec<Rc<Matrix>>>,
 }
 
 impl Open {
     pub fn new() -> Self {
         Self {
-            hashset: HashSet::new(),
+            hashmap: HashMap::new(),
             btree: BTreeMap::new(),
         }
     }
     pub fn insert(&mut self, fcost: i32, matrix: Rc<Matrix>) {
-        self.hashset.insert(matrix.data.clone());
+        self.hashmap.insert(matrix.data.clone(), fcost);
         match self.btree.get_mut(&fcost) {
             None => {
                 self.btree.insert(fcost, vec![matrix]);
@@ -36,7 +36,7 @@ impl Open {
     }
     ///The first value in BtreeMap is a vector which contains one or more matrix with the minimum fcost.
     /// Pop out a matrix from vec. If vec is empty after pop, delete vec.
-    /// delete this matrix form HashSet too.
+    /// delete this matrix form hashmap too.
     pub fn pop_first(&mut self) -> Rc<Matrix> {
         let (&first_k, _matrix_vec) = self.btree.iter().next().unwrap();
         let matrix_vec = self.btree.get_mut(&first_k).unwrap();
@@ -44,9 +44,24 @@ impl Open {
         if (*matrix_vec).is_empty() {
             self.btree.remove(&first_k);
         }
-        self.hashset.remove(&matrix.data);
+        self.hashmap.remove(&matrix.data);
         matrix
     }
+
+    // pub fn update(&mut self, new: Rc<Matrix>){
+    //     let new_fcost = new.h_cost + new.g_cost;
+    //     let old_fcost = self.hashmap.get_mut(&new.data).unwrap();
+    //     let matrix_vec = self.btree.get_mut(old_fcost).unwrap();
+    //     for (index, m) in matrix_vec.into_iter().enumerate(){
+    //         if m.data == new.data{
+    //             // *old_fcost = new_fcost;
+    //             matrix_vec.remove(index);
+    //             self.insert(new_fcost, new);
+    //             break;
+    //         }
+    //     }
+
+    // }
 }
 
 // impl PartialEq for Matrix {

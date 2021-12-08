@@ -29,7 +29,7 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
     let mut open: Open = Open::new();
     let mut closed: HashSet<Vec<i32>> = HashSet::new();
-    let mut matrices: Vec<Rc<Matrix>> = Vec::new();
+    let mut strong_ref: Vec<Rc<Matrix>> = Vec::new();
     let mut max_open: usize = 0; // Maximum number of states ever represented in memory
 
     // add origin matrix in open
@@ -37,7 +37,7 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let fcost = origin.h_cost + origin.g_cost;
     let rc = Rc::new(origin);
     open.insert(fcost, rc.clone());
-    matrices.push(rc);
+    strong_ref.push(rc);
     let mut open_counter = 1;
 
     while !open.btree.is_empty() {
@@ -52,7 +52,8 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
             if closed.contains(&neighbour.data) {
                 continue;
             }
-            let in_open = open.hashset.contains(&neighbour.data);
+
+            let in_open = open.hashmap.contains_key(&neighbour.data);
 
             neighbour.update_h_cost(&goal, &heu);
 
@@ -60,19 +61,16 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
             if neighbour.h_cost + neighbour.g_cost < current.h_cost + current.g_cost || !in_open {
                 neighbour.g_cost += 1;
                 neighbour.parent = Some(Rc::downgrade(&current)); // set parent of neighbour is current
-                if !in_open {
-                    //if neighbour not in open, then add to open list
-                    let fcost = neighbour.h_cost + neighbour.g_cost;
-                    let rc = Rc::new(neighbour);
-                    open.insert(fcost, rc.clone());
-                    matrices.push(rc);
-                    open_counter += 1;
-                }
+                let fcost = neighbour.h_cost + neighbour.g_cost;
+                let nei = Rc::new(neighbour);
+                open.insert(fcost, Rc::clone(&nei));
+                open_counter += 1;
+                strong_ref.push(nei);
             }
         }
 
-        max_open = match max_open < open.hashset.len() {
-            true => open.hashset.len(),
+        max_open = match max_open < open.hashmap.len() {
+            true => open.hashmap.len(),
             false => max_open,
         }
     }
