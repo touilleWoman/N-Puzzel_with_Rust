@@ -2,10 +2,8 @@
 use super::parser::make_goal;
 use super::types::{Matrix, Open};
 use super::Heuristic;
-use std::rc::Rc;
 use std::collections::HashSet;
-// use std::collections::BTreeMap;
-// use std::rc::Weak;
+use std::rc::Rc;
 
 ///return next possible steps of a given puzzel
 fn neighbours(current: Rc<Matrix>) -> Vec<Matrix> {
@@ -26,14 +24,13 @@ fn neighbours(current: Rc<Matrix>) -> Vec<Matrix> {
         .collect()
 }
 
-/// A* algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
+/// A* search algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
 pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let goal: Matrix = Matrix::new(origin.row, make_goal(origin.row)).unwrap();
-    // let mut open: BTreeMap<i32, Rc<Matrix>> = BTreeMap::new();
     let mut open: Open = Open::new();
     let mut closed: HashSet<Vec<i32>> = HashSet::new();
     let mut matrices: Vec<Rc<Matrix>> = Vec::new();
-    let mut max_nb: usize = 0; // Maximum number of states ever represented in memory
+    let mut max_open: usize = 0; // Maximum number of states ever represented in memory
 
     // add origin matrix in open
     origin.update_h_cost(&goal, &heu);
@@ -44,41 +41,27 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
     let mut open_counter = 1;
 
     while !open.btree.is_empty() {
-        
         // select the Matrix with the lowest f_cost in open list
-        // Since BtreeMap is ordered according to key value, min is the first item
-        let (&first_k, _matrix_vec)= open.btree.iter().next().unwrap();
-        let matrix_vec = open.btree.get_mut(&first_k).unwrap();
-        let current = (*matrix_vec).pop().unwrap();
-        if (*matrix_vec).is_empty(){
-            open.btree.remove(&first_k);
-        }
-        open.hashset.remove(&current.data);
-
-        closed.insert(current.data.clone());
-
+        let current = open.pop_first();
         if current.data == goal.data {
-            return Some(solution_found(open_counter, max_nb, current.as_ref()));
+            return Some(solution_found(open_counter, max_open, current.as_ref()));
         }
+        closed.insert(current.data.clone());
 
         for mut neighbour in neighbours(current.clone()) {
             if closed.contains(&neighbour.data) {
                 continue;
             }
-
             let in_open = open.hashset.contains(&neighbour.data);
 
             neighbour.update_h_cost(&goal, &heu);
 
             // if neighbour matrix has lower f_cost(f = h + g) OR neighbour in open list
-            if neighbour.h_cost + neighbour.g_cost < current.h_cost + current.g_cost
-                || !in_open
-            {
+            if neighbour.h_cost + neighbour.g_cost < current.h_cost + current.g_cost || !in_open {
                 neighbour.g_cost += 1;
                 neighbour.parent = Some(Rc::downgrade(&current)); // set parent of neighbour is current
-                if !in_open{
+                if !in_open {
                     //if neighbour not in open, then add to open list
-                    // open.push(Rc::new(nei));
                     let fcost = neighbour.h_cost + neighbour.g_cost;
                     let rc = Rc::new(neighbour);
                     open.insert(fcost, rc.clone());
@@ -88,9 +71,9 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic) -> Option<Vec<i32>> {
             }
         }
 
-        max_nb = match max_nb < open.btree.len() {
-            true => open.btree.len(),
-            false => max_nb,
+        max_open = match max_open < open.hashset.len() {
+            true => open.hashset.len(),
+            false => max_open,
         }
     }
     return None;

@@ -1,8 +1,7 @@
 //! struct Matrix and methods
-use std::ptr::NonNull;
-use std::rc::{Rc, Weak};
-use std::collections::HashSet;
 use std::collections::BTreeMap;
+use std::collections::HashSet;
+use std::rc::{Rc, Weak};
 use std::vec;
 
 #[derive(Clone)]
@@ -14,29 +13,41 @@ pub struct Matrix {
     pub g_cost: i32,
 }
 
-pub struct Open{
+pub struct Open {
     pub hashset: HashSet<Vec<i32>>,
     pub btree: BTreeMap<i32, Vec<Rc<Matrix>>>,
 }
 
 impl Open {
     pub fn new() -> Self {
-        Self{
-            hashset : HashSet::new(),
+        Self {
+            hashset: HashSet::new(),
             btree: BTreeMap::new(),
         }
     }
-    pub fn insert(&mut self, fcost: i32, matrix: Rc<Matrix>){
+    pub fn insert(&mut self, fcost: i32, matrix: Rc<Matrix>) {
         self.hashset.insert(matrix.data.clone());
-        match self.btree.get_mut(&fcost){
-            None => {self.btree.insert(fcost, vec![matrix]);},
-            Some(x) => {(*x).push(matrix)},
+        match self.btree.get_mut(&fcost) {
+            None => {
+                self.btree.insert(fcost, vec![matrix]);
+            }
+            Some(x) => (*x).push(matrix),
         }
     }
-
-    
+    ///The first value in BtreeMap is a vector which contains one or more matrix with the minimum fcost.
+    /// Pop out a matrix from vec. If vec is empty after pop, delete vec.
+    /// delete this matrix form HashSet too.
+    pub fn pop_first(&mut self) -> Rc<Matrix> {
+        let (&first_k, _matrix_vec) = self.btree.iter().next().unwrap();
+        let matrix_vec = self.btree.get_mut(&first_k).unwrap();
+        let matrix = (*matrix_vec).pop().unwrap();
+        if (*matrix_vec).is_empty() {
+            self.btree.remove(&first_k);
+        }
+        self.hashset.remove(&matrix.data);
+        matrix
+    }
 }
-
 
 // impl PartialEq for Matrix {
 //     fn eq(&self, other: &Self) -> bool {
@@ -128,5 +139,3 @@ impl Heuristic {
         }
     }
 }
-
-

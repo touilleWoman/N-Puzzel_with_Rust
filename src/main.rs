@@ -79,5 +79,7 @@ fn main() {
     };
     let heuristic = Heuristic::from_str(heu.trim()).unwrap();
     println! {"Using heuristic {:?}", heuristic};
-    a_star::a_star(m, heuristic);
+    if a_star::a_star(m, heuristic) == None {
+        println! {"This puzzle is unsolvable"};
+    }
 }
