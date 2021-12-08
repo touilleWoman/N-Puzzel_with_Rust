@@ -1,5 +1,9 @@
 //! struct Matrix and methods
+use std::ptr::NonNull;
 use std::rc::{Rc, Weak};
+use std::collections::HashSet;
+use std::collections::BTreeMap;
+use std::vec;
 
 #[derive(Clone)]
 pub struct Matrix {
@@ -9,6 +13,30 @@ pub struct Matrix {
     pub h_cost: i32,
     pub g_cost: i32,
 }
+
+pub struct Open{
+    pub hashset: HashSet<Vec<i32>>,
+    pub btree: BTreeMap<i32, Vec<Rc<Matrix>>>,
+}
+
+impl Open {
+    pub fn new() -> Self {
+        Self{
+            hashset : HashSet::new(),
+            btree: BTreeMap::new(),
+        }
+    }
+    pub fn insert(&mut self, fcost: i32, matrix: Rc<Matrix>){
+        self.hashset.insert(matrix.data.clone());
+        match self.btree.get_mut(&fcost){
+            None => {self.btree.insert(fcost, vec![matrix]);},
+            Some(x) => {(*x).push(matrix)},
+        }
+    }
+
+    
+}
+
 
 // impl PartialEq for Matrix {
 //     fn eq(&self, other: &Self) -> bool {
@@ -100,3 +128,5 @@ impl Heuristic {
         }
     }
 }
+
+
