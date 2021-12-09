@@ -3,7 +3,7 @@ use std::rc::Rc;
 
 ///return next possible steps of a given puzzel
 pub fn neighbours(current: Rc<Matrix>, row: i32) -> Vec<Matrix> {
-    let p = current.position(0, row);
+    let p = position(&current.data, 0, row);
 
     static NEIGHBOUR: [(i32, i32); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
     NEIGHBOUR
@@ -20,10 +20,16 @@ pub fn neighbours(current: Rc<Matrix>, row: i32) -> Vec<Matrix> {
         .collect()
 }
 
-/// print puzzle board 
+/// print puzzle board
 pub fn nice_print(mut board: Vec<i32>, row: i32) {
     for _ in 0..row {
         println!("{:?}", board.drain(0..row as usize).as_slice());
     }
     println!();
+}
+
+/// find position of value in puzzle board
+pub fn position(board: &Vec<i32>, value: i32, row: i32) -> (i32, i32) {
+    let p: i32 = board.iter().position(|&x| x == value).unwrap() as i32;
+    (p % row, p / row)
 }

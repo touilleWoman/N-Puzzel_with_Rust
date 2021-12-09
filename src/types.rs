@@ -1,7 +1,8 @@
 //! struct Matrix and methods
 use std::collections::BTreeMap;
 use std::rc::{Rc, Weak};
-use std::vec;
+// use std::vec;
+use super::tools;
 
 #[derive(Clone)]
 pub struct Matrix {
@@ -67,20 +68,15 @@ impl Matrix {
         };
         return Ok(m);
     }
-    pub fn position(&self, value: i32, row: i32) -> (i32, i32) {
-        let p: i32 = self.data.iter().position(|&x| x == value).unwrap() as i32;
-        // println!("position of value({}) =>{}", value, p);
-        (p % row, p / row)
-    }
 
-    pub fn update_h_cost(&mut self, goal: &Matrix, heu: &Heuristic, row: i32) {
+    pub fn update_h_cost(&mut self, goal: &Vec<i32>, heu: &Heuristic, row: i32) {
         let mut total = 0;
         for value in self.data.iter() {
             if *value == 0 {
                 continue;
             }
-            let po_goal = goal.position(*value, row);
-            let po_current = self.position(*value, row);
+            let po_goal = tools::position(goal, *value, row);
+            let po_current = tools::position(&self.data, *value, row);
             total += match heu {
                 Heuristic::Manhattan => manhattan(po_current, po_goal),
                 Heuristic::TilesOut => tiles_out_of_place(po_current, po_goal),
@@ -123,4 +119,10 @@ impl Heuristic {
             _ => Err("Wrong heuristic input, choose from Manhattan, Euclidean or TileOut"),
         }
     }
+}
+
+pub enum Algo {
+    ASTAR,
+    GREEDY,
+    UNIFORM,
 }

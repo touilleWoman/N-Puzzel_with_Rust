@@ -3,18 +3,17 @@ use std::collections::HashSet;
 use std::rc::Rc;
 
 use super::parser::make_goal;
+use super::tools;
 use super::types::{Matrix, Open};
 use super::Heuristic;
-use super::tools;
-
 
 /// A* search algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
 pub fn a_star(mut origin: Matrix, heu: Heuristic, row: i32) -> Option<Vec<i32>> {
-    let goal: Matrix = Matrix::new(row, make_goal(row)).unwrap();
+    let goal = make_goal(row);
     let mut open: Open = Open::new();
     let mut closed: HashSet<Vec<i32>> = HashSet::new();
-    
-    // To avoid stack overflow caused by recursive free of parent, 
+
+    // To avoid stack overflow caused by recursive free of parent,
     // I use weak ref for parent, so I need strong_ref to store strong ref
     let mut strong_ref: Vec<Rc<Matrix>> = Vec::new();
 
@@ -25,16 +24,16 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic, row: i32) -> Option<Vec<i32>> 
     open.insert(fcost, rc.clone());
     strong_ref.push(rc);
 
-    let mut open_total:u32 = 1;
-    let mut open_now:u32= 1;
+    let mut open_total: u32 = 1;
+    let mut open_now: u32 = 1;
 
     while !open.btree.is_empty() {
         // pop out the matrix having lowest f_cost in open, add to closed
         let current = open.pop_first();
-        open_now -=1;
+        open_now -= 1;
         closed.insert(current.data.clone());
 
-        if current.data == goal.data {
+        if current.data == goal {
             return Some(solution_found(open_total, open_now, current.as_ref(), row));
         }
 
@@ -43,7 +42,8 @@ pub fn a_star(mut origin: Matrix, heu: Heuristic, row: i32) -> Option<Vec<i32>> 
             if closed.contains(&neighbour.data) {
                 continue;
             }
-            neighbour.update_h_cost(&goal, &heu,row);
+            
+            neighbour.update_h_cost(&goal, &heu, row);
             neighbour.g_cost += 1;
             let fcost = neighbour.h_cost + neighbour.g_cost;
             neighbour.parent = Some(Rc::downgrade(&current)); // set parent of neighbour is current
@@ -63,7 +63,7 @@ complexity in size =>   Maximum number of states ever represented in memory at t
 Nb of moves =>          Number of moves required to transition from the initial state to the final state, according to the search
 
 */
-fn solution_found(open_total: u32, open_now: u32, cur: &Matrix, row:i32) -> Vec<i32> {
+fn solution_found(open_total: u32, open_now: u32, cur: &Matrix, row: i32) -> Vec<i32> {
     println!("Solution found !");
     println!("complexity in time: {}", open_total);
     println!("complexity in size: {}", open_now);
