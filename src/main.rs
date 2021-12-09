@@ -38,6 +38,12 @@ fn main() {
         "choose heuristic in [manhatten](default) [euclidean] [tiles_out_of_place]",
         "Ex: euclidean",
     );
+    opts.optopt(
+        "a",
+        "algo",
+        "choose algo in [astar](default) [greedy] [uniform]",
+        "Ex: greedy",
+    );
 
     let matches = match opts.parse(&args[1..]) {
         Ok(x) => x,
@@ -79,7 +85,13 @@ fn main() {
     };
     let heuristic = Heuristic::from_str(heu.trim()).unwrap();
     println! {"Using heuristic {:?}", heuristic};
-    if a_star::a_star(m, heuristic, row) == None {
+    let alg = match matches.opt_str("a") {
+        None => "Astar".to_string(), // A_star is default algo
+        Some(x) => x,
+    };
+    let algo = Algo::from_str(alg.trim()).unwrap();
+    println! {"Using algo {:?}", alg};
+    if algo::search(m, algo,heuristic, row) == None {
         println! {"solvable: false"};
     }
 }

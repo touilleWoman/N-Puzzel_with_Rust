@@ -1,7 +1,6 @@
 //! struct Matrix and methods
 use std::collections::BTreeMap;
 use std::rc::{Rc, Weak};
-// use std::vec;
 use super::tools;
 
 #[derive(Clone)]
@@ -23,7 +22,6 @@ impl Open {
         }
     }
     pub fn insert(&mut self, fcost: i32, matrix: Rc<Matrix>) {
-        // self.hashmap.insert(matrix.data.clone(), fcost);
         match self.btree.get_mut(&fcost) {
             None => {
                 self.btree.insert(fcost, vec![matrix]);
@@ -33,7 +31,6 @@ impl Open {
     }
     ///The first value in BtreeMap is a vector which contains one or more matrix with the minimum fcost.
     /// Pop out a matrix from vec. If vec is empty after pop, delete vec.
-    /// delete this matrix form hashmap too.
     pub fn pop_first(&mut self) -> Rc<Matrix> {
         let (&first_k, _matrix_vec) = self.btree.iter().next().unwrap();
         let matrix_vec = self.btree.get_mut(&first_k).unwrap();
@@ -41,7 +38,6 @@ impl Open {
         if (*matrix_vec).is_empty() {
             self.btree.remove(&first_k);
         }
-        // self.hashmap.remove(&matrix.data);
         matrix
     }
 }
@@ -69,22 +65,37 @@ impl Matrix {
         return Ok(m);
     }
 
-    pub fn update_h_cost(&mut self, goal: &Vec<i32>, heu: &Heuristic, row: i32) {
-        let mut total = 0;
-        for value in self.data.iter() {
-            if *value == 0 {
-                continue;
+    pub fn update_cost(&mut self, goal: &Vec<i32>, algo: &Algo, heu: &Heuristic, row: i32) {
+        match *algo {
+            Algo::Astar => {
+                self.h_cost = calculate_hcost(&self.data, goal, heu, row);
+                self.g_cost += 1;
             }
-            let po_goal = tools::position(goal, *value, row);
-            let po_current = tools::position(&self.data, *value, row);
-            total += match heu {
-                Heuristic::Manhattan => manhattan(po_current, po_goal),
-                Heuristic::TilesOut => tiles_out_of_place(po_current, po_goal),
-                Heuristic::Euclidean => euclidean(po_current, po_goal),
+            Algo::Greedy => {
+                self.h_cost = calculate_hcost(&self.data, goal, heu, row);
+            }
+            Algo::Uniform => {
+                self.g_cost += 1;
             }
         }
-        self.h_cost = total;
     }
+}
+
+fn calculate_hcost(board: &Vec<i32>, goal: &Vec<i32>, heu: &Heuristic, row: i32) -> i32 {
+    let mut total = 0;
+    for value in board.iter() {
+        if *value == 0 {
+            continue;
+        }
+        let po_goal = tools::position(goal, *value, row);
+        let po_current = tools::position(&board, *value, row);
+        total += match heu {
+            Heuristic::Manhattan => manhattan(po_current, po_goal),
+            Heuristic::TilesOut => tiles_out_of_place(po_current, po_goal),
+            Heuristic::Euclidean => euclidean(po_current, po_goal),
+        };
+    }
+    total
 }
 
 fn tiles_out_of_place(p: (i32, i32), goal: (i32, i32)) -> i32 {
@@ -122,7 +133,18 @@ impl Heuristic {
 }
 
 pub enum Algo {
-    ASTAR,
-    GREEDY,
-    UNIFORM,
+    Astar,
+    Greedy,
+    Uniform,
+}
+
+impl Algo {
+    pub fn from_str(s: &str) -> Result<Algo, &'static str> {
+        match s {
+            "Astar" | "a_star" | "astar" => Ok(Algo::Astar),
+            "Greedy" | "greedy" => Ok(Algo::Greedy),
+            "Uniform" | "uniform" => Ok(Algo::Uniform),
+            _ => Err("Wrong algo input, choose from Astar, Greedy or Uniform"),
+        }
+    }
 }
