@@ -1,28 +1,12 @@
 //! A* algo for searching solution of N-puzzel
-use super::parser::make_goal;
-use super::types::{Matrix, Open};
-use super::Heuristic;
 use std::collections::HashSet;
 use std::rc::Rc;
 
-///return next possible steps of a given puzzel
-fn neighbours(current: Rc<Matrix>, row: i32) -> Vec<Matrix> {
-    let p = current.position(0, row);
+use super::parser::make_goal;
+use super::types::{Matrix, Open};
+use super::Heuristic;
+use super::tools::neighbours;
 
-    static NEIGHBOUR: [(i32, i32); 4] = [(0, 1), (0, -1), (1, 0), (-1, 0)];
-    NEIGHBOUR
-        .iter()
-        .map(|(a, b)| (p.0 + a, p.1 + b))
-        .filter(|(x, y)| *x >= 0 && *x < row && *y >= 0 && *y < row)
-        .map(|(a, b)| {
-            let mut c = (*current).clone();
-            let val: i32 = c.data[(b * row + a) as usize];
-            c.data[(p.1 * row + p.0) as usize] = val;
-            c.data[(b * row + a) as usize] = 0;
-            c
-        })
-        .collect()
-}
 
 /// A* search algo with 3 optional heuristics : manhanttan distance, euclidean distance or nb of tiles out of places
 pub fn a_star(mut origin: Matrix, heu: Heuristic, row: i32) -> Option<Vec<i32>> {

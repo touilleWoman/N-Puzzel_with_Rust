@@ -63,16 +63,6 @@ impl Open {
     // }
 }
 
-// impl PartialEq for Matrix {
-//     fn eq(&self, other: &Self) -> bool {
-//         self.row == other.row &&
-//         self.data == other.data &&
-//         self.h_cost == other.h_cost &&
-//         self.g_cost == other.g_cost
-
-//     }
-// }
-
 impl Matrix {
     pub fn new(row: i32, data: Vec<i32>) -> Result<Matrix, &'static str> {
         if row < 3 {
