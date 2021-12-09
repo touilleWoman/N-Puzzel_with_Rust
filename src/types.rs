@@ -6,7 +6,6 @@ use std::vec;
 
 #[derive(Clone)]
 pub struct Matrix {
-    pub row: i32,
     pub data: Vec<i32>,
     pub parent: Option<Weak<Matrix>>,
     pub h_cost: i32,
@@ -89,7 +88,6 @@ impl Matrix {
             return Err("Puzzel content wrong");
         }
         let m = Self {
-            row: row,
             data: data,
             parent: None,
             h_cost: 0,
@@ -97,20 +95,20 @@ impl Matrix {
         };
         return Ok(m);
     }
-    pub fn position(&self, value: i32) -> (i32, i32) {
+    pub fn position(&self, value: i32, row: i32) -> (i32, i32) {
         let p: i32 = self.data.iter().position(|&x| x == value).unwrap() as i32;
         // println!("position of value({}) =>{}", value, p);
-        (p % self.row, p / self.row)
+        (p % row, p / row)
     }
 
-    pub fn update_h_cost(&mut self, goal: &Matrix, heu: &Heuristic) {
+    pub fn update_h_cost(&mut self, goal: &Matrix, heu: &Heuristic, row: i32) {
         let mut total = 0;
         for value in self.data.iter() {
             if *value == 0 {
                 continue;
             }
-            let po_goal = goal.position(*value);
-            let po_current = self.position(*value);
+            let po_goal = goal.position(*value, row);
+            let po_current = self.position(*value, row);
             total += match heu {
                 Heuristic::Manhattan => manhattan(po_current, po_goal),
                 Heuristic::TilesOut => tiles_out_of_place(po_current, po_goal),

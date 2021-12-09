@@ -55,20 +55,21 @@ fn main() {
     let opt_file = matches.opt_str("f");
     let iteration = matches.opt_str("i");
 
-    let m = if opt_gen.is_none() && opt_file.is_none() {
+    let (m, row) = if opt_gen.is_none() && opt_file.is_none() {
         println!("No starting board infos, generate default => puzzle of size 3");
-        generator::generator(3, 50, unsolvable)
+        (generator::generator(3, 500, unsolvable), 3)
     } else if opt_gen.is_some() {
         let iter: i32 = match iteration {
             Some(x) => x.parse::<i32>().unwrap(),
             None => 1000,
         };
-        generator::generator(opt_gen.unwrap().parse::<i32>().unwrap(), iter, unsolvable)
+        let row = opt_gen.unwrap().parse::<i32>().unwrap();
+        (generator::generator(row, iter, unsolvable), row)
     } else {
         parser::parse(&(opt_file.unwrap()))
     };
     // println!("Puzzle size: {}\n{:?}", m.row, m.data);
-    if unsolvable_check::unsolvable_check(&m) {
+    if unsolvable_check::unsolvable_check(&m, row) {
         println!("This puzzle is unsolvable => \n{:?}", m.data);
         return;
     }
@@ -79,7 +80,7 @@ fn main() {
     };
     let heuristic = Heuristic::from_str(heu.trim()).unwrap();
     println! {"Using heuristic {:?}", heuristic};
-    if a_star::a_star(m, heuristic) == None {
+    if a_star::a_star(m, heuristic, row) == None {
         println! {"This puzzle is unsolvable"};
     }
 }

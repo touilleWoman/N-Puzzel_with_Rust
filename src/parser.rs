@@ -32,7 +32,7 @@ pub fn make_goal(row: i32) -> Vec<i32> {
     }
 }
 
-pub fn parse(filepath: &str) -> Matrix {
+pub fn parse(filepath: &str) -> (Matrix, i32) {
     let mut err_msg = String::from("Wrong file path => ");
     err_msg.push_str(filepath);
     let file = File::open(filepath).expect(&err_msg);
@@ -58,5 +58,5 @@ pub fn parse(filepath: &str) -> Matrix {
             }
         }
     }
-    Matrix::new(row, data).unwrap()
+    (Matrix::new(row, data).unwrap(), row)
 }

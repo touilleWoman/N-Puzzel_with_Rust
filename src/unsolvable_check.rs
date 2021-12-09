@@ -41,8 +41,8 @@ fn inversion_count(board: &Vec<i32>, row: i32) -> u32 {
     inv_count
 }
 
-pub fn unsolvable_check(m: &Matrix) -> bool {
-    let count = inversion_count(&m.data, m.row);
+pub fn unsolvable_check(m: &Matrix, row: i32) -> bool {
+    let count = inversion_count(&m.data, row);
     match count % 2 {
         0 => false,
         1 => true,
