@@ -68,9 +68,8 @@ fn main() {
     } else {
         parser::parse(&(opt_file.unwrap()))
     };
-    // println!("Puzzle size: {}\n{:?}", m.row, m.data);
     if unsolvable_check::unsolvable_check(&m, row) {
-        println!("This puzzle is unsolvable => \n{:?}", m.data);
+        println!("solvable: false => \n{:?}", m.data);
         return;
     }
 
@@ -81,6 +80,6 @@ fn main() {
     let heuristic = Heuristic::from_str(heu.trim()).unwrap();
     println! {"Using heuristic {:?}", heuristic};
     if a_star::a_star(m, heuristic, row) == None {
-        println! {"This puzzle is unsolvable"};
+        println! {"solvable: false"};
     }
 }

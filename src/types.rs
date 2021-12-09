@@ -1,6 +1,5 @@
 //! struct Matrix and methods
 use std::collections::BTreeMap;
-use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 use std::vec;
 
@@ -13,19 +12,17 @@ pub struct Matrix {
 }
 
 pub struct Open {
-    pub hashmap: HashMap<Vec<i32>, i32>,
     pub btree: BTreeMap<i32, Vec<Rc<Matrix>>>,
 }
 
 impl Open {
     pub fn new() -> Self {
         Self {
-            hashmap: HashMap::new(),
             btree: BTreeMap::new(),
         }
     }
     pub fn insert(&mut self, fcost: i32, matrix: Rc<Matrix>) {
-        self.hashmap.insert(matrix.data.clone(), fcost);
+        // self.hashmap.insert(matrix.data.clone(), fcost);
         match self.btree.get_mut(&fcost) {
             None => {
                 self.btree.insert(fcost, vec![matrix]);
@@ -43,24 +40,9 @@ impl Open {
         if (*matrix_vec).is_empty() {
             self.btree.remove(&first_k);
         }
-        self.hashmap.remove(&matrix.data);
+        // self.hashmap.remove(&matrix.data);
         matrix
     }
-
-    // pub fn update(&mut self, new: Rc<Matrix>){
-    //     let new_fcost = new.h_cost + new.g_cost;
-    //     let old_fcost = self.hashmap.get_mut(&new.data).unwrap();
-    //     let matrix_vec = self.btree.get_mut(old_fcost).unwrap();
-    //     for (index, m) in matrix_vec.into_iter().enumerate(){
-    //         if m.data == new.data{
-    //             // *old_fcost = new_fcost;
-    //             matrix_vec.remove(index);
-    //             self.insert(new_fcost, new);
-    //             break;
-    //         }
-    //     }
-
-    // }
 }
 
 impl Matrix {

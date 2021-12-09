@@ -19,3 +19,11 @@ pub fn neighbours(current: Rc<Matrix>, row: i32) -> Vec<Matrix> {
         })
         .collect()
 }
+
+/// print puzzle board 
+pub fn nice_print(mut board: Vec<i32>, row: i32) {
+    for _ in 0..row {
+        println!("{:?}", board.drain(0..row as usize).as_slice());
+    }
+    println!();
+}
