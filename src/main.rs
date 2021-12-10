@@ -33,7 +33,7 @@ fn main() {
         "Ex: testfiless/test3-1",
     );
     opts.optopt(
-        "h",
+        "e",
         "heuristic",
         "choose heuristic in [manhatten](default) [euclidean] [tiles_out_of_place]",
         "Ex: euclidean",
