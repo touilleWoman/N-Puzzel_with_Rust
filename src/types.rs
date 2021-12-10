@@ -1,12 +1,12 @@
 //! struct Matrix and methods
 use std::collections::BTreeMap;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use super::tools;
 
 #[derive(Clone)]
 pub struct Matrix {
     pub data: Vec<i32>,
-    pub parent: Option<Rc<Matrix>>,
+    pub parent: Option<Weak<Matrix>>,
     pub h_cost: i32,
     pub g_cost: i32,
 }

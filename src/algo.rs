@@ -13,12 +13,18 @@ pub fn search(mut origin: Matrix, algo: Algo, heu: Heuristic, row: i32) -> Optio
     let mut open: Open = Open::new();
     let mut closed: HashSet<Vec<i32>> = HashSet::new();
 
+    // To avoid stack overflow caused by recursive free of parent,
+    // I use weak ref for parent, so I need strong_ref to store strong ref
+    let mut strong_ref: Vec<Rc<Matrix>> = Vec::new();
+
     // add origin matrix in open
     origin.update_cost(&goal, &algo, &heu, row);
     origin.g_cost = 0;
     let fcost = origin.h_cost + origin.g_cost;
     let rc = Rc::new(origin);
     open.insert(fcost, rc.clone());
+    strong_ref.push(rc);
+
 
     let mut open_total: u32 = 1;
     let mut open_now: u32 = 1;
@@ -42,11 +48,12 @@ pub fn search(mut origin: Matrix, algo: Algo, heu: Heuristic, row: i32) -> Optio
 
             neighbour.update_cost(&goal, &algo, &heu, row);
             let fcost = neighbour.h_cost + neighbour.g_cost;
-            neighbour.parent = Some(current.clone()); // set parent of neighbour is current
+            neighbour.parent = Some(Rc::downgrade(&current)); // set parent of neighbour is current
             let nei = Rc::new(neighbour);
             open.insert(fcost, Rc::clone(&nei));
             open_total += 1;
             open_now += 1;
+            strong_ref.push(nei);
         }
     }
     return None;
@@ -76,7 +83,7 @@ fn recursive_print_parent(cur: &Matrix, row:i32, count: &mut u16){
     match cur.parent.as_ref() {
         None => {}
         Some(next) => {
-            recursive_print_parent(&next, row, count);
+            recursive_print_parent(&next.upgrade().unwrap(), row, count);
         }
     };
     let board: Vec<i32> = cur.data.clone();

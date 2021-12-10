@@ -1,5 +1,6 @@
 # N-Puzzle_with_Rust
-42 school project: solve the N-puzzle ("taquin" in French) game using the A* search algorithm
+42 school project: solve the N-puzzle ("taquin" in French) game using
+ the A* search algorithm, greedy search and uniform search
 <img width="614" alt="屏幕快照 2021-11-11 11 56 14" src="https://user-images.githubusercontent.com/39769383/141286801-2316831f-d5e2-4cdb-8635-c052b2b77dfd.png">
 
 ## Usage
@@ -19,5 +20,7 @@ Options:
     -h, --heuristic Ex: euclidean
                         choose heuristic in [manhatten](default) [euclidean]
                         [tiles_out_of_place]
+    -a, --algo Ex: greedy
+                        choose algo in [astar](default) [greedy] [uniform]    
 
 ```
